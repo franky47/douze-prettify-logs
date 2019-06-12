@@ -1,0 +1,18 @@
+language: node_js
+
+node_js:
+  - node
+
+  cache: yarn
+
+script:
+  - yarn ci
+
+deploy:
+  provider: npm
+  email: accounts@francoisbest.com
+  api_key:
+    secure: QR84L/a8TfWWuNOnBZzz/oZHyLQs2y/I0HRuZxaMxscgxwBlfP/dYsn45jJYffF5tGhNTmvlhB1OARx57YzIlTClPNvUah7H3IyYtjXRiKqxujZ897SP6arANwGV377UqFayE/YcBKhQvAvLOvR9weOEmg5/+ZzfhsbUmqZrrKQQdpI+1qigz5KR3ldNK6LModJ41+ObduA5GeNq6pGNSqFV4Axj4gBB78COvd5OvO/c3FsfPbY5gvAnTMsiveLwNwU/S8mj618hRc76wEQhcpH2yrGNzAFoBoXal1MehhjNQtE5geqVXOeN2dRMGZtgQ1FDvrQTbiatIwRsaMRFauKSDXdE0ERMWYinqBd/hiWxhRdF7Pea72eTYM4udtH+eDDqbyxkv0vwgvoSnJXa9YU0zIlCItA5fUOvz+LeIYfZLcQYJFbSNXGPJjE7GJjktBs5XZWBXclyau4o2wnKLbalJvdaTVaYTmUQ03tnUUTOjJccpUQg68xTROm2VuOV88stjt7tVR4Z8181bgdAfFp2Ld7I6emsB4k1bz46lEWhQ0SUey0C9VAnr+MPaOKKCbXNBsSAkofnp6YUzAzNTEaD0kk6LgjnAh3XIfXlxCZGjzDNKIfV9ddnlf8T0rVZ4QjQJIsOuFXAFcFklvywSVA9E1foKPbNJRVJnzuVU1s=
+  on:
+    tags: true
+  skip_cleanup: true
