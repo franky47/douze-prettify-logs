@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 import readline from 'readline'
 import { prettifyLogLine } from './prettify'
 
