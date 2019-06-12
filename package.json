@@ -19,6 +19,9 @@
     "ndjson",
     "prettify"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "nodemon -e ts,.env -w .env -w . -x 'cat douze.ndjson | ts-node ./src/main.ts'",
     "build:clean": "rm -rf ./dist",
