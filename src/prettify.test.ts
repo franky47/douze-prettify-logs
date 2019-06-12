@@ -31,7 +31,7 @@ describe('Levels', () => {
     const levelNeg = prettifyLevel(-12)
     expect(levelNeg).toEqual('trace')
     const levelHigh = prettifyLevel(1000)
-    expect(levelHigh).toEqual('fatal')
+    expect(levelHigh).toEqual('FATAL')
   })
 })
 

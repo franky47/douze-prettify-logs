@@ -25,9 +25,9 @@ export const prettifyLevel = (level: number): string => {
   if (level <= 10) return chalk.dim('trace')
   if (level <= 20) return chalk.magenta('debug')
   if (level <= 30) return chalk.blue('info ')
-  if (level <= 40) return chalk.yellow('warn ')
-  if (level <= 50) return chalk.red('error')
-  return chalk.redBright('fatal')
+  if (level <= 40) return chalk.yellow('WARN ')
+  if (level <= 50) return chalk.red('ERROR')
+  return chalk.redBright('FATAL')
 }
 
 // --
