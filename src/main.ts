@@ -4,7 +4,7 @@ import path from 'path'
 import readline from 'readline'
 import program from 'commander'
 import chalk from 'chalk'
-import { prettifyLogLine } from './prettify'
+import { parseLogEntry, prettifyLogEntry } from './prettify'
 import { CliOptions, parseLevel } from './defs'
 
 // --
@@ -46,9 +46,15 @@ function main() {
   })
 
   rl.on('line', line => {
-    const logLine = prettifyLogLine(line, options)
-    if (logLine) {
+    try {
+      const entry = parseLogEntry(line)
+      if (entry.level < options.level) {
+        return
+      }
+      const logLine = prettifyLogEntry(entry, options)
       console.log(logLine)
+    } catch (error) {
+      console.log(line)
     }
   })
 }

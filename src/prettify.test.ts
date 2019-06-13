@@ -1,33 +1,61 @@
 import chalk from 'chalk'
 import {
+  parseLogEntry,
+  prettifyLogEntry,
   prettifyLevel,
-  prettifyLogLine,
   getExtraStuff,
   formatDate
 } from './prettify'
-import { CliOptions } from './defs'
+import { CliOptions, LogEntry } from './defs'
 
 const options: CliOptions = {
-  color: new chalk.constructor({ enabled: false })
+  color: new chalk.constructor({ enabled: false }),
+  level: 30
 }
 
+const defaultLogEntry: LogEntry = {
+  v: 1,
+  time: 1560370115565,
+  level: 30,
+  msg: 'Hello, World !',
+  name: 'test',
+  instance: 'foo.bar.egg'
+}
+
+describe('parseLogEntry', () => {
+  test('empty string', () => {
+    const run = () => parseLogEntry('')
+    expect(run).toThrowError()
+  })
+
+  test('non-JSON line', () => {
+    const run = () => parseLogEntry('not a JSON string')
+    expect(run).toThrowError()
+  })
+
+  test('non-Pino JSON object', () => {
+    const run = () => parseLogEntry('{"hello":"world"}')
+    expect(run).toThrowError()
+  })
+
+  test('minimal log line', () => {
+    const received = parseLogEntry('{"v":1,"time":1560370115565}')
+    expect(received.time).toEqual(1560370115565)
+  })
+})
+
+// --
+
 describe('Date', () => {
-  let originalOffset: () => number
-
-  beforeEach(() => {
-    originalOffset = Date.prototype.getTimezoneOffset
-    Date.prototype.getTimezoneOffset = () => 120 // UTC+2
-  })
-  afterEach(() => {
-    Date.prototype.getTimezoneOffset = originalOffset
-  })
-
   test('default option should use local time', () => {
-    // todo: set time zone info to Europe/Paris
+    // Override UTC offset
+    const originalOffset = Date.prototype.getTimezoneOffset
+    Date.prototype.getTimezoneOffset = () => 120 // UTC+2
 
     const received = formatDate(1560370115565, options)
     const expected = '2019-06-12 22:08:35.565'
     expect(received).toEqual(expected)
+
     Date.prototype.getTimezoneOffset = originalOffset
   })
 
@@ -94,72 +122,59 @@ describe('getExtraStuff', () => {
   })
 })
 
-describe('prettifyLogLine', () => {
-  test('non-JSON line is passed through unchanged', () => {
-    const expected = 'not a JSON string'
-    const received = prettifyLogLine(expected, options)
-    expect(received).toEqual(expected)
-  })
-
-  test('non-Pino JSON lines are passed through unchanged', () => {
-    const expected = '{"hello":"world"}'
-    const received = prettifyLogLine(expected, options)
-    expect(received).toEqual(expected)
-  })
-
-  test('minimal log line should contain the date as ISO-8601', () => {
-    const logLine = '{"v":1,"time":1560370115565}'
-    const received = prettifyLogLine(logLine, { ...options, utc: true })
+describe('prettifyLogEntry', () => {
+  test('log line should contain the date as ISO-8601', () => {
+    const received = prettifyLogEntry(defaultLogEntry, {
+      ...options,
+      utc: true
+    })
     expect(received).toMatch('2019-06-12 20:08:35.565Z')
     expect(received.split('\n').length).toEqual(1)
   })
 
   test('log line should contain the instance name', () => {
-    const logLine = '{"v":1,"time":1560370115565,"instance":"foo.bar.egg"}'
-    const received = prettifyLogLine(logLine, options)
+    const received = prettifyLogEntry(defaultLogEntry, options)
     expect(received).toMatch('foo.bar.egg')
     expect(received.split('\n').length).toEqual(1)
   })
 
-  test('log line should contain the git commit ID', () => {
-    const logLine = '{"v":1,"time":1560370115565,"commit":"12345678"}'
-    const received = prettifyLogLine(logLine, options)
-    expect(received).toMatch('12345678')
-    expect(received.split('\n').length).toEqual(1)
-  })
-
   test('log line should contain the level name', () => {
-    const logLine = '{"v":1,"time":1560370115565,"level":30}'
-    const received = prettifyLogLine(logLine, options)
+    const received = prettifyLogEntry(defaultLogEntry, options)
     expect(received).toMatch('info')
     expect(received.split('\n').length).toEqual(1)
   })
 
-  test('log line should contain the category', () => {
-    const logLine = '{"v":1,"time":1560370115565,"category":"foo"}'
-    const received = prettifyLogLine(logLine, options)
-    expect(received).toMatch('foo')
-    expect(received.split('\n').length).toEqual(1)
-  })
-
   test('log line should contain the message', () => {
-    const logLine = '{"v":1,"time":1560370115565,"msg":"Hello, World !"}'
-    const received = prettifyLogLine(logLine, options)
+    const received = prettifyLogEntry(defaultLogEntry, options)
     expect(received).toMatch('Hello, World !')
     expect(received.split('\n').length).toEqual(1)
   })
 
+  test('log line should contain the category', () => {
+    const entry: LogEntry = { ...defaultLogEntry, category: '41IWygsCU' }
+    const received = prettifyLogEntry(entry, options)
+    expect(received).toMatch('41IWygsCU')
+    expect(received.split('\n').length).toEqual(1)
+  })
+
+  test('log line should contain the git commit ID', () => {
+    const entry: LogEntry = { ...defaultLogEntry, commit: '12345678' }
+    const received = prettifyLogEntry(entry, options)
+    expect(received).toMatch('12345678')
+    expect(received.split('\n').length).toEqual(1)
+  })
+
   test('log line should contain metadata', () => {
-    const logLine = '{"v":1,"time":1560370115565,"meta":{"hello":"world"}}'
-    const received = prettifyLogLine(logLine, options)
+    const entry: LogEntry = { ...defaultLogEntry, meta: { hello: 'world' } }
+    const received = prettifyLogEntry(entry, options)
     expect(received).toMatch('{"hello":"world"}')
     expect(received).not.toMatch('meta')
     expect(received.split('\n').length).toEqual(1)
   })
 
   test('log lines with extra stuff should be expanded', () => {
-    const logLine = '{"v":1,"time":1560370115565,"extra":"stuff"}'
-    const received = prettifyLogLine(logLine, options)
+    const entry: LogEntry = { ...defaultLogEntry, extra: 'stuff' }
+    const received = prettifyLogEntry(entry, options)
     expect(received.split('\n').length).toBeGreaterThan(1)
     expect(received.split('\n').length).toBeLessThanOrEqual(4)
     expect(received).toMatch('"extra": "stuff"')

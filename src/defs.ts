@@ -28,3 +28,24 @@ export const parseLevel = (
   }
   return parseLevel(defaultValue)
 }
+
+// --
+
+export interface LogEntry {
+  // Pino fields
+  v: 1
+  level: number
+  msg: string
+  time: number
+  name: string
+
+  // Douze-specific
+  category?: string
+  instance: string
+  commit?: string
+  meta?: {
+    [key: string]: any
+  }
+
+  [extra: string]: any
+}

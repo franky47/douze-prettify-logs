@@ -1,27 +1,18 @@
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import { Chalk } from 'chalk'
-import { CliOptions } from './defs'
+import { CliOptions, LogEntry } from './defs'
 
 dayjs.extend(utc)
 
-interface LogEntry {
-  // Pino fields
-  v: 1
-  level: number
-  msg: string
-  time: number
-  name: string
+// --
 
-  // Douze-specific
-  category?: string
-  instance: string
-  commit?: string
-  meta?: {
-    [key: string]: any
+export const parseLogEntry = (line: string): LogEntry => {
+  const entry: LogEntry = JSON.parse(line)
+  if (entry.v !== 1) {
+    throw new Error('Unknown format')
   }
-
-  [extra: string]: any
+  return entry
 }
 
 // --
@@ -68,40 +59,29 @@ export const formatDate = (time: number, options: CliOptions): string => {
   return date.replace('T', ' ')
 }
 
-export const prettifyLogLine = (line: string, options: CliOptions) => {
-  let object: LogEntry
-  try {
-    object = JSON.parse(line)
-    if (object.v !== 1) {
-      throw new Error('Unknown format')
-    }
-    if (object.level < options.level) {
-      return null
-    }
+// --
 
-    const date = formatDate(object.time, options)
-    const level = prettifyLevel(object.level, options.color)
-    const header = [
-      options.color.dim(date),
-      object.instance,
-      object.commit && options.color.dim(object.commit.slice(0, 8)),
-      level.padEnd(5, ' '),
-      object.category && options.color.dim(object.category.padEnd(5, ' ')),
-      object.level <= 20 ? options.color.dim(object.msg) : object.msg,
-      object.meta && options.color.dim(JSON.stringify(object.meta))
-    ]
-      .filter(x => !!x)
-      .join(' ')
-    const rest = getExtraStuff(object)
-    return [
-      header,
-      Object.keys(rest).length > 0 &&
-        !options.compact &&
-        JSON.stringify(rest, null, options.inline ? 0 : 2)
-    ]
-      .filter(x => x)
-      .join(options.inline ? ' ' : '\n')
-  } catch (error) {
-    return line
-  }
+export const prettifyLogEntry = (entry: LogEntry, options: CliOptions) => {
+  const date = formatDate(entry.time, options)
+  const level = prettifyLevel(entry.level, options.color)
+  const header = [
+    options.color.dim(date),
+    entry.instance,
+    entry.commit && options.color.dim(entry.commit.slice(0, 8)),
+    level.padEnd(5, ' '),
+    entry.category && options.color.dim(entry.category.padEnd(5, ' ')),
+    entry.level <= 20 ? options.color.dim(entry.msg) : entry.msg,
+    entry.meta && options.color.dim(JSON.stringify(entry.meta))
+  ]
+    .filter(x => !!x)
+    .join(' ')
+  const rest = getExtraStuff(entry)
+  return [
+    header,
+    Object.keys(rest).length > 0 &&
+      !options.compact &&
+      JSON.stringify(rest, null, options.inline ? 0 : 2)
+  ]
+    .filter(x => x)
+    .join(options.inline ? ' ' : '\n')
 }
