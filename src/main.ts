@@ -1,5 +1,6 @@
 #! /usr/bin/env node
 
+import fs from 'fs'
 import path from 'path'
 import readline from 'readline'
 import program from 'commander'
@@ -57,6 +58,9 @@ function main() {
       console.log(line)
     }
   })
+
+  // Don't kill the process to prettify exit logs generated upstream
+  process.once('SIGINT', () => {})
 }
 
 // --
