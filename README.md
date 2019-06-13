@@ -15,3 +15,18 @@ $ npm i -D douze-prettify-logs
 ```shell
 $ ts-node your-douze-app.ts | douze-prettify-logs
 ```
+
+## CLI Options
+
+```
+$ douze-prettify-logs --help
+Usage: douze-prettify-logs [options]
+
+Options:
+  -V, --version      output the version number
+  -u, --utc          Show dates as UTC rather than localized
+  -i, --inline       Display extra data inline
+  -f, --force-color  Force coloring the output even if in a pipe context
+  -c, --compact      Don't display extra data at all
+  -h, --help         output usage information
+```
