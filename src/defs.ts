@@ -2,9 +2,10 @@ import { Chalk } from 'chalk'
 
 export interface CliOptions {
   level: number
+  category?: string
   utc?: boolean
   inline?: boolean
-  compact?: boolean
+  quiet?: boolean
   color: Chalk
 }
 

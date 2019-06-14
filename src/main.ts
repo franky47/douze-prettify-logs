@@ -20,17 +20,19 @@ const readArguments = (): CliOptions => {
     .name('douze-prettify-logs')
     .version(readVersion())
     .option('-l, --level <level>', 'Log level', 'info')
+    .option('-c, --category <category>', 'Filter by category')
     .option('-u, --utc', 'Show dates as UTC rather than localized')
     .option('-i, --inline', 'Display extra data inline')
-    .option('-c, --compact', "Don't display extra data at all")
+    .option('-q, --quiet', "Don't display extra data at all")
     .option('-n, --no-color', 'Disable coloring of the output')
     .parse(process.argv)
 
   return {
     level: parseLevel(program.level),
+    category: program.category,
     utc: program.utc,
     inline: program.inline,
-    compact: program.compact,
+    quiet: program.quiet,
     color: new chalk.constructor({
       enabled: !program.noColor
     })
@@ -50,6 +52,13 @@ function main() {
     try {
       const entry = parseLogEntry(line)
       if (entry.level < options.level) {
+        return
+      }
+      if (
+        entry.category &&
+        options.category &&
+        entry.category !== options.category
+      ) {
         return
       }
       const logLine = prettifyLogEntry(entry, options)

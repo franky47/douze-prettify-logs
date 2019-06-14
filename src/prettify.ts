@@ -116,7 +116,7 @@ export const prettifyLogEntry = (entry: LogEntry, options: CliOptions) => {
   return [
     header,
     Object.keys(rest).length > 0 &&
-      !options.compact &&
+      !options.quiet &&
       JSON.stringify(rest, null, options.inline ? 0 : 2)
   ]
     .filter(x => x)
