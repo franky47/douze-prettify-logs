@@ -4,7 +4,8 @@ import {
   prettifyLogEntry,
   prettifyLevel,
   getExtraStuff,
-  formatDate
+  formatDate,
+  generateHttpMessage
 } from './prettify'
 import { CliOptions, LogEntry } from './defs'
 
@@ -63,6 +64,8 @@ describe('Date', () => {
   })
 })
 
+// --
+
 describe('Levels', () => {
   test('uncolorized levels are all the same length', () => {
     const level10 = prettifyLevel(10, options.color)
@@ -87,6 +90,8 @@ describe('Levels', () => {
     expect(levelHigh).toEqual('FATAL')
   })
 })
+
+// --
 
 describe('getExtraStuff', () => {
   test('no other properties', () => {
@@ -118,6 +123,114 @@ describe('getExtraStuff', () => {
     })
   })
 })
+
+// --
+
+describe('generateHttpMessage', () => {
+  const color = chalk.constructor({ enabled: false })
+
+  test('with content-length', () => {
+    const entry: LogEntry = {
+      ...defaultLogEntry,
+      msg: 'request completed',
+      req: {
+        url: '/foo/bar'
+      },
+      res: {
+        statusCode: 123,
+        headers: {
+          'content-length': 42
+        }
+      },
+      responseTime: 12
+    }
+    const received = generateHttpMessage(entry, color)
+    const expected = '123 /foo/bar 12 ms - 42 bytes'
+    expect(received).toEqual(expected)
+  })
+
+  test('without content-length', () => {
+    const entry: LogEntry = {
+      ...defaultLogEntry,
+      msg: 'request completed',
+      req: {
+        url: '/foo/bar'
+      },
+      res: {
+        statusCode: 123
+      },
+      responseTime: 12
+    }
+    const received = generateHttpMessage(entry, color)
+    const expected = '123 /foo/bar 12 ms'
+    expect(received).toEqual(expected)
+  })
+
+  test('missing trigger message returns original message', () => {
+    const entry: LogEntry = {
+      ...defaultLogEntry,
+      req: {
+        url: '/foo/bar'
+      },
+      res: {
+        statusCode: 123
+      },
+      responseTime: 12
+    }
+    const received = generateHttpMessage(entry, color)
+    const expected = defaultLogEntry.msg
+    expect(received).toEqual(expected)
+  })
+
+  test('missing request object returns original message', () => {
+    const entry: LogEntry = {
+      ...defaultLogEntry,
+      msg: 'request completed',
+      res: {
+        statusCode: 123
+      },
+      responseTime: 12
+    }
+    const received = generateHttpMessage(entry, color)
+    const expected = 'request completed'
+    expect(received).toEqual(expected)
+  })
+
+  test('missing response object returns original message', () => {
+    const entry: LogEntry = {
+      ...defaultLogEntry,
+      msg: 'request completed',
+      req: {
+        url: '/foo/bar'
+      },
+      responseTime: 12
+    }
+    const received = generateHttpMessage(entry, color)
+    const expected = 'request completed'
+    expect(received).toEqual(expected)
+  })
+
+  test('missing response time', () => {
+    const entry: LogEntry = {
+      ...defaultLogEntry,
+      msg: 'request completed',
+      req: {
+        url: '/foo/bar'
+      },
+      res: {
+        statusCode: 123,
+        headers: {
+          'content-length': 42
+        }
+      }
+    }
+    const received = generateHttpMessage(entry, color)
+    const expected = '123 /foo/bar - 42 bytes'
+    expect(received).toEqual(expected)
+  })
+})
+
+// --
 
 describe('prettifyLogEntry', () => {
   test('log line should contain the date as ISO-8601', () => {

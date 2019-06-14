@@ -61,6 +61,41 @@ export const formatDate = (time: number, options: CliOptions): string => {
 
 // --
 
+export const generateHttpMessage = (entry: LogEntry, color: Chalk) => {
+  if (entry.msg !== 'request completed' || !entry.req || !entry.res) {
+    return entry.msg
+  }
+
+  const colorForStatusCode = (status: number): Chalk => {
+    if (status >= 500) return color.red
+    if (status >= 400) return color.yellow
+    if (status >= 300) return color.cyan
+    if (status >= 200) return color.green
+    return color.reset
+  }
+
+  try {
+    const { req, res } = entry
+    return [
+      req.fingerprint,
+      req.id,
+      colorForStatusCode(res.statusCode)(res.statusCode),
+      req.method,
+      req.url,
+      entry.responseTime !== undefined && entry.responseTime + ' ms',
+      ...(res.headers && res.headers['content-length']
+        ? ['-', res.headers['content-length'] + ' bytes']
+        : [])
+    ]
+      .filter(x => !!x)
+      .join(' ')
+  } catch (error) {
+    return entry.msg
+  }
+}
+
+// --
+
 export const prettifyLogEntry = (entry: LogEntry, options: CliOptions) => {
   const date = formatDate(entry.time, options)
   const level = prettifyLevel(entry.level, options.color)
@@ -70,7 +105,9 @@ export const prettifyLogEntry = (entry: LogEntry, options: CliOptions) => {
     entry.commit && options.color.dim(entry.commit.slice(0, 8)),
     level.padEnd(5, ' '),
     entry.category && options.color.dim(entry.category.padEnd(5, ' ')),
-    entry.level <= 20 ? options.color.dim(entry.msg) : entry.msg,
+    entry.level <= 20
+      ? options.color.dim(entry.msg)
+      : generateHttpMessage(entry, options.color),
     entry.meta && options.color.dim(JSON.stringify(entry.meta))
   ]
     .filter(x => !!x)
