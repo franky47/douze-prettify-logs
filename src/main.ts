@@ -7,6 +7,7 @@ import program from 'commander'
 import chalk from 'chalk'
 import { parseLogEntry, prettifyLogEntry } from './prettify'
 import { CliOptions, parseLevel } from './defs'
+import { levelFilter, categoryFilter } from './filters'
 
 // --
 
@@ -51,14 +52,10 @@ function main() {
   rl.on('line', line => {
     try {
       const entry = parseLogEntry(line)
-      if (entry.level < options.level) {
+      if (!levelFilter(entry, options.level)) {
         return
       }
-      if (
-        entry.category &&
-        options.category &&
-        entry.category.toLowerCase() !== options.category.toLowerCase()
-      ) {
+      if (!categoryFilter(entry, options.category)) {
         return
       }
       const logLine = prettifyLogEntry(entry, options)
