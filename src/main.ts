@@ -57,7 +57,7 @@ function main() {
       if (
         entry.category &&
         options.category &&
-        entry.category !== options.category
+        entry.category.toLowerCase() !== options.category.toLowerCase()
       ) {
         return
       }
