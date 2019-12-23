@@ -77,8 +77,6 @@ export const generateHttpMessage = (entry: LogEntry, color: Chalk) => {
   try {
     const { req, res } = entry
     return [
-      req.fingerprint,
-      req.id,
       colorForStatusCode(res.statusCode)(res.statusCode),
       req.method,
       req.url,
@@ -105,6 +103,7 @@ export const prettifyLogEntry = (entry: LogEntry, options: CliOptions) => {
     entry.commit && options.color.dim(entry.commit.slice(0, 8)),
     level.padEnd(5, ' '),
     entry.category && options.color.dim(entry.category.padEnd(5, ' ')),
+    entry.req?.id,
     entry.level <= 20
       ? options.color.dim(entry.msg)
       : generateHttpMessage(entry, options.color),
