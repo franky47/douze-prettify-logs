@@ -40,7 +40,7 @@ Examples:
     .parse(process.argv)
 
   return {
-    level: parseLevel(program.level),
+    level: parseLevel(program.level, process.env.LOG_LEVEL),
     category: program.category,
     utc: program.utc,
     inline: program.inline,
