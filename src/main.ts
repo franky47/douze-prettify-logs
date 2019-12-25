@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 
-import fs from 'fs'
+import dotenv from 'dotenv'
 import path from 'path'
 import readline from 'readline'
 import program from 'commander'
@@ -52,6 +52,8 @@ Examples:
 }
 
 function main() {
+  dotenv.config()
+
   const options = readArguments()
 
   const rl = readline.createInterface({
