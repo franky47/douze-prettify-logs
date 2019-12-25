@@ -10,15 +10,13 @@ export interface CliOptions {
   color: Chalk
 }
 
-export const parseLevel = (
-  level: string,
-  defaultValue: string = 'info'
-): number => {
+export const parseLevel = (level: string): number => {
   switch (level) {
     case 'trace':
       return 10
     case 'debug':
       return 20
+    default:
     case 'info':
       return 30
     case 'warn':
@@ -28,7 +26,6 @@ export const parseLevel = (
     case 'fatal':
       return 60
   }
-  return parseLevel(defaultValue)
 }
 
 // --
