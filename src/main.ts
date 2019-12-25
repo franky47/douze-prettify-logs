@@ -26,6 +26,7 @@ const readArguments = (): CliOptions => {
     .option('-u, --utc', 'Show dates as UTC rather than localized')
     .option('-i, --inline', 'Display extra data inline')
     .option('-q, --quiet', "Don't display extra data at all")
+    .option('-d, --discard', 'Discard non-NDJSON lines')
     .option('-n, --no-color', 'Disable coloring of the output')
     .on('--help', () =>
       console.log(`
@@ -45,6 +46,7 @@ Examples:
     utc: program.utc,
     inline: program.inline,
     quiet: program.quiet,
+    discardNonNdjson: program.discard,
     color: new chalk.constructor({
       enabled: !program.noColor
     })
@@ -74,7 +76,9 @@ function main() {
       const logLine = prettifyLogEntry(entry, options)
       console.log(logLine)
     } catch (error) {
-      console.log(line)
+      if (!options.discardNonNdjson) {
+        console.log(line)
+      }
     }
   })
 

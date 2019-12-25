@@ -6,6 +6,7 @@ export interface CliOptions {
   utc?: boolean
   inline?: boolean
   quiet?: boolean
+  discardNonNdjson?: boolean
   color: Chalk
 }
 
